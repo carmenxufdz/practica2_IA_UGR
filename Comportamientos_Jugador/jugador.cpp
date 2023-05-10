@@ -5,6 +5,7 @@
 #include <cmath>
 #include <set>
 #include <stack>
+#include <queue>
 
 ///////////////////////////////
 // Este es el método principal que se piden en la practica.
@@ -22,9 +23,16 @@ Action ComportamientoJugador::think(Sensores sensores)
 			c_state.jugador.f = sensores.posF;
 			c_state.jugador.c = sensores.posC;
 			c_state.jugador.brujula = sensores.sentido;
+
 			c_state.sonambulo.f = sensores.SONposF;
 			c_state.sonambulo.c = sensores.SONposC;
 			c_state.sonambulo.brujula = sensores.SONsentido;
+
+			c_state.J_bikini = false;
+			c_state.J_zapatillas = false;
+			c_state.S_bikini = false;
+			c_state.S_zapatillas = false;
+
 			goal.f = sensores.destinoF;
 			goal.c = sensores.destinoC;
 
@@ -37,6 +45,7 @@ Action ComportamientoJugador::think(Sensores sensores)
 					plan = AnchuraJugadorYSonambulo(c_state, goal, mapaResultado);
 					break;
 				case 2:
+					plan = CostoUniformeJugador(c_state, goal, mapaResultado);
 					break;
 				case 3:
 					break;
@@ -574,6 +583,92 @@ void ComportamientoJugador::AnularMatriz(vector<vector<unsigned char>> &matriz)
 			matriz[i][j] = 0;
 }
 
+
+
+// Devuelve el coste de avanzar en una casilla en el mapa
+int ComportamientoJugador::getCosteJugador(estado &st){
+	int coste = 1;
+	unsigned char casilla = mapaResultado[st.jugador.f][st.jugador.c];
+
+    if(casilla == 'A' && st.J_bikini == true)
+        coste = 10;
+    else if (casilla == 'A' && st.J_bikini == false)
+        coste = 200;
+
+    if(casilla == 'B' && st.J_zapatillas == true)
+        coste = 15;
+    else if (casilla == 'B' && st.J_zapatillas == false)
+        coste = 100;
+
+    if(casilla == 'T')
+        coste = 2;
+
+	return coste;
+}
+
+int ComportamientoJugador::getCosteSonambulo(estado &st){
+	int coste = 1;
+	unsigned char casilla = mapaResultado[st.sonambulo.f][st.sonambulo.c];
+
+    if(casilla == 'A' && st.S_bikini == true)
+        coste = 10;
+    else if (casilla == 'A' && st.S_bikini == false)
+        coste = 200;
+
+    if(casilla == 'B' && st.S_zapatillas == true)
+        coste = 15;
+    else if (casilla == 'B' && st.S_zapatillas == false)
+        coste = 100;
+
+    if(casilla == 'T')
+        coste = 2;
+
+	return coste;
+}
+
+// Devuelve el coste de girar en una casilla en el mapa
+int ComportamientoJugador::getCosteGiroJugador(estado &st){
+	int coste = 1;
+	unsigned char casilla = mapaResultado[st.jugador.f][st.jugador.c];
+
+    if(casilla == 'A' && st.J_bikini == true)
+        coste = 5;
+    else if(casilla == 'A' && st.J_bikini == false)
+        coste = 500;
+
+    if(casilla == 'B' && st.J_zapatillas == true)
+        coste = 1;
+    else if (casilla == 'B' && st.J_zapatillas == false)
+        coste = 3;
+
+    if(casilla == 'T')
+        coste = 2;
+
+	return coste;
+}
+
+int ComportamientoJugador::getCosteGiroSonambulo(estado &st){
+	int coste = 1;
+	unsigned char casilla = mapaResultado[st.sonambulo.f][st.sonambulo.c];
+
+    if(casilla == 'A' && st.S_bikini == true)
+        coste = 5;
+    else if(casilla == 'A' && st.S_bikini == false)
+        coste = 500;
+
+    if(casilla == 'B' && st.S_zapatillas == true)
+        coste = 1;
+    else if (casilla == 'B' && st.S_zapatillas == false)
+        coste = 3;
+
+    if(casilla == 'T')
+        coste = 2;
+
+	return coste;
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////// NIVEL 0 ///////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -581,9 +676,9 @@ void ComportamientoJugador::AnularMatriz(vector<vector<unsigned char>> &matriz)
 list<Action> ComportamientoJugador::AnchuraSoloJugador(const estado &inicio, const ubicacion &final,
 									const vector<vector<unsigned char>> &mapa)
 {
-	nodeN0 current_node;
-	list<nodeN0> frontier;
-	set<nodeN0> explored;
+	node current_node;
+	list<node> frontier;
+	set<node> explored;
 	list<Action> plan;
 	current_node.st = inicio;
 	frontier.push_back(current_node);
@@ -595,7 +690,7 @@ list<Action> ComportamientoJugador::AnchuraSoloJugador(const estado &inicio, con
 		explored.insert(current_node);
 
 		// Generar hijo actFORWARD
-		nodeN0 child_forward = current_node;
+		node child_forward = current_node;
 		child_forward.st = apply(actFORWARD, current_node.st, mapa);
 		if(child_forward.st.jugador.f == final.f and child_forward.st.jugador.c == final.c)
 		{
@@ -611,7 +706,7 @@ list<Action> ComportamientoJugador::AnchuraSoloJugador(const estado &inicio, con
 
 		if(!SolutionFound){
 			// Generar hijo actTURN_L
-			nodeN0 child_turnl = current_node;
+			node child_turnl = current_node;
 			child_turnl.st = apply(actTURN_L, current_node.st, mapa);
 			if(explored.find(child_turnl) == explored.end())
 			{
@@ -619,7 +714,7 @@ list<Action> ComportamientoJugador::AnchuraSoloJugador(const estado &inicio, con
 				frontier.push_back(child_turnl);
 			}
 			// Generar hijo actTURN_R
-			nodeN0 child_turnr = current_node;
+			node child_turnr = current_node;
 			child_turnr.st = apply(actTURN_R, current_node.st, mapa);
 			if(explored.find(child_turnr) == explored.end())
 			{
@@ -651,9 +746,9 @@ list<Action> ComportamientoJugador::AnchuraSoloJugador(const estado &inicio, con
 list<Action> ComportamientoJugador::AnchuraJugadorYSonambulo(const estado &inicio, const ubicacion &final,
 										const vector<vector<unsigned char>> &mapa)
 {
-	nodeN1 current_node;
-    list<nodeN1> frontier;
-    set<nodeN1> explored;
+	node current_node;
+    list<node> frontier;
+    set<node> explored;
     list<Action> plan;
     current_node.st = inicio;
     frontier.push_back(current_node);
@@ -668,7 +763,7 @@ list<Action> ComportamientoJugador::AnchuraJugadorYSonambulo(const estado &inici
         
 		if(!SonambuloALaVista(current_node.st.jugador, current_node.st.sonambulo)){
 			// Generar hijo actFORWARD
-			nodeN1 child_forward = current_node;
+			node child_forward = current_node;
 			child_forward.st = apply(actFORWARD, current_node.st, mapa);
 
 			if(explored.find(child_forward) == explored.end())
@@ -681,7 +776,7 @@ list<Action> ComportamientoJugador::AnchuraJugadorYSonambulo(const estado &inici
 			if(!SolutionFound)
 			{
 				// Generar hijo actTURN_L
-				nodeN1 child_turnl = current_node;
+				node child_turnl = current_node;
 				child_turnl.st = apply(actTURN_L, current_node.st, mapa);
 				if(explored.find(child_turnl) == explored.end())
 				{
@@ -689,7 +784,7 @@ list<Action> ComportamientoJugador::AnchuraJugadorYSonambulo(const estado &inici
 					frontier.push_back(child_turnl);
 				}
 				// Generar hijo actTURN_R
-				nodeN1 child_turnr = current_node;
+				node child_turnr = current_node;
 				child_turnr.st = apply(actTURN_R, current_node.st, mapa);
 				if(explored.find(child_turnr) == explored.end())
 				{
@@ -701,7 +796,7 @@ list<Action> ComportamientoJugador::AnchuraJugadorYSonambulo(const estado &inici
 		else
 		{
 			// Generar hijo actSON_FORWARD
-			nodeN1 sonambulo_forward = current_node;
+			node sonambulo_forward = current_node;
 			sonambulo_forward.st = apply(actSON_FORWARD, current_node.st, mapa);
 			if(sonambulo_forward.st.sonambulo.f == final.f 
 				and sonambulo_forward.st.sonambulo.c == final.c)
@@ -720,7 +815,7 @@ list<Action> ComportamientoJugador::AnchuraJugadorYSonambulo(const estado &inici
 			if(!SolutionFound){
 
 				// Generar hijo actSON_TURN_SL
-				nodeN1 sonambulo_turnl = current_node;
+				node sonambulo_turnl = current_node;
 				sonambulo_turnl.st = apply(actSON_TURN_SL, current_node.st, mapa);
 
 				if(explored.find(sonambulo_turnl) == explored.end())
@@ -731,7 +826,7 @@ list<Action> ComportamientoJugador::AnchuraJugadorYSonambulo(const estado &inici
 				}
 
 				// Generar hijo actSON_TURN_SL
-				nodeN1 sonambulo_turnr = current_node;
+				node sonambulo_turnr = current_node;
 				sonambulo_turnr.st = apply(actSON_TURN_SR, current_node.st, mapa);
 
 				if(explored.find(sonambulo_turnr) == explored.end())
@@ -758,6 +853,62 @@ list<Action> ComportamientoJugador::AnchuraJugadorYSonambulo(const estado &inici
 
 	return plan;
 
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////// NIVEL 2 ///////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+list<Action> ComportamientoJugador::CostoUniformeJugador(const estado &inicio, const ubicacion &final, 
+										const vector<vector<unsigned char>> &mapa) {
+
+	list<Action> plan;
+    set<node> explored;                  // Nodos ya explorados (cerrados)
+	priority_queue<node, vector<node>, greater<node>> frontier;  // Lista de nodos por explorar
+    node current_node;
+	current_node.st = inicio;
+    frontier.push(current_node);
+
+ 	while (!frontier.empty())
+	{
+		frontier.pop();
+		if (current_node.st.jugador.f == final.f && current_node.st.jugador.c == final.c) {
+            plan = current_node.secuencia;
+            break;
+        }
+		explored.insert(current_node);
+
+        // Generar hijo actFORWARD
+		node child_forward = current_node;
+		child_forward.st = apply(actFORWARD, current_node.st, mapa);
+		if(explored.find(child_forward) == explored.end())
+		{
+			child_forward.coste += getCosteJugador(child_forward.st);
+			child_forward.secuencia.push_back(actFORWARD);
+			frontier.push(child_forward);
+		}
+
+		// Generar hijo actTURN_L
+			node child_turnl = current_node;
+			child_turnl.st = apply(actTURN_L, current_node.st, mapa);
+			if(explored.find(child_turnl) == explored.end())
+			{
+				child_turnl.coste += getCosteGiroJugador(child_turnl.st);
+				child_turnl.secuencia.push_back(actTURN_L);
+				frontier.push(child_turnl);
+			}
+			// Generar hijo actTURN_R
+			node child_turnr = current_node;
+			child_turnr.st = apply(actTURN_R, current_node.st, mapa);
+			if(explored.find(child_turnr) == explored.end())
+			{
+				child_turnr.coste += getCosteGiroJugador(child_turnr.st);
+				child_turnr.secuencia.push_back(actTURN_R);
+				frontier.push(child_turnr);
+			}
+	}
+
+	return plan;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -795,4 +946,25 @@ void ComportamientoJugador::VisualizaPlan(const estado &st, const list<Action> &
 		}
 		it++;
 	}
+}
+
+// Sacar por la consola la secuencia del plan obtenido
+void ComportamientoJugador::PintaPlan(list<Action> plan) {
+	auto it = plan.begin();
+	while (it!=plan.end()){
+		if (*it == actFORWARD){
+			cout << "A ";
+		}
+		else if (*it == actTURN_R){
+			cout << "D ";
+		}
+		else if (*it == actTURN_L){
+			cout << "I ";
+		}
+		else {
+			cout << "- ";
+		}
+		it++;
+	}
+	cout << endl;
 }
