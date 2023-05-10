@@ -5,20 +5,19 @@
 
 #include <list>
 
-struct stateN0{
+struct estado{
   ubicacion jugador;
   ubicacion sonambulo;
 
-  bool operator== (const stateN0 &x) const{
+  bool operator== (const estado &x) const{
     return (jugador == x.jugador 
-    and sonambulo.f == x.sonambulo.f 
-    and sonambulo.c == sonambulo.c);
+    and sonambulo == x.sonambulo);
 
   }
 };
 
 struct nodeN0{
-  stateN0 st;
+  estado st;
   list<Action> secuencia;
 
   bool operator== (const nodeN0 &n) const{
@@ -31,6 +30,38 @@ struct nodeN0{
     else if (st.jugador.f == n.st.jugador.f and st.jugador.c < n.st.jugador.c)
       return true;
     else if (st.jugador.f == n.st.jugador.f and st.jugador.c == n.st.jugador.c and st.jugador.brujula < n.st.jugador.brujula)
+      return true;
+    else 
+      return false;
+  }
+};
+
+struct nodeN1{
+  estado st;
+  list<Action> secuencia;
+
+  bool operator== (const nodeN1 &n) const{
+    return (st == n.st);
+  }
+
+  bool operator< (const nodeN1 &n) const {
+    if (st.sonambulo.f < n.st.sonambulo.f)
+      return true;
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c < n.st.sonambulo.c)
+      return true;
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+            and st.sonambulo.brujula < n.st.sonambulo.brujula)
+      return true;
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.jugador.f < n.st.jugador.f)
+      return true;
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.jugador.f == n.st.jugador.f 
+            and st.jugador.c < n.st.jugador.c)
+      return true;
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.jugador.f == n.st.jugador.f 
+            and st.jugador.c == n.st.jugador.c and st.jugador.brujula < n.st.jugador.brujula)
       return true;
     else 
       return false;
@@ -53,17 +84,30 @@ class ComportamientoJugador : public Comportamiento {
     Action think(Sensores sensores);
     int interact(Action accion, int valor);
 
-    void VisualizaPlan(const stateN0 &st, const list<Action> &plan);
+    void VisualizaPlan(const estado &st, const list<Action> &plan);
 
 
   private:
     // Declarar Variables de Estado
     list<Action> plan;    // Almacena el plan en ejecucion
     bool hayPlan;         // TRUE: esta siguiendo un plan
-    stateN0 c_state;      // Estado nvl 0
+    estado c_state;      // Estado nvl 0
     ubicacion goal;       // Posicion a la que se debe llegar
     vector<vector<unsigned char>> matrizConPlan;
 
+    estado apply(const Action &a, const estado &st, const vector<vector<unsigned char>> &mapa);
+
+    bool CasillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> &mapa);
+    bool SonambuloALaVista(ubicacion &jugador, ubicacion &sonambulo);
+
+    void AnularMatriz(vector<vector<unsigned char>> &matriz);
+
+    ubicacion NextCasilla(const ubicacion &pos);
+    
+    list<Action> AnchuraSoloJugador(const estado &inicio, const ubicacion &final,
+						const vector<vector<unsigned char>> &mapa);
+    list<Action> AnchuraJugadorYSonambulo(const estado &inicio, const ubicacion &final,
+						const vector<vector<unsigned char>> &mapa);
 
 
 
