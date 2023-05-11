@@ -10,10 +10,12 @@ struct estado{
   ubicacion sonambulo;
   bool J_bikini, J_zapatillas;
   bool S_bikini, S_zapatillas;
+  int coste;
+  int coste_total = 0;
 
   bool operator== (const estado &x) const{
-    return (jugador == x.jugador 
-    and sonambulo == x.sonambulo);
+    return (jugador.f == x.jugador.f and jugador.c == x.jugador.c 
+    and sonambulo.f == x.sonambulo.f and sonambulo.c == x.sonambulo.c);
 
   }
 };
@@ -21,45 +23,82 @@ struct estado{
 struct node{
   estado st;
   list<Action> secuencia;
-  int coste;
 
   bool operator== (const node &n) const{
     return (st == n.st);
   }
 
-  bool operator > (const node &n) const{
-    if(coste > n.coste)
-      return true;
-    else
-      return false;
-  }
-
   bool operator< (const node &n) const {
-    if(coste < n.coste)
+    if (st.sonambulo.f < n.st.sonambulo.f)
       return true;
-    else if (coste == n.coste and st.sonambulo.f < n.st.sonambulo.f)
+
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c < n.st.sonambulo.c)
       return true;
-    else if (coste == n.coste and st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c < n.st.sonambulo.c)
-      return true;
-    else if (coste == n.coste and st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
             and st.sonambulo.brujula < n.st.sonambulo.brujula)
       return true;
-    else if (coste == n.coste and st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
             and st.sonambulo.brujula == n.st.sonambulo.brujula and st.jugador.f < n.st.jugador.f)
       return true;
-    else if (coste == n.coste and st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
             and st.sonambulo.brujula == n.st.sonambulo.brujula and st.jugador.f == n.st.jugador.f 
             and st.jugador.c < n.st.jugador.c)
       return true;
-    else if (coste == n.coste and st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
             and st.sonambulo.brujula == n.st.sonambulo.brujula and st.jugador.f == n.st.jugador.f 
             and st.jugador.c == n.st.jugador.c and st.jugador.brujula < n.st.jugador.brujula)
       return true;
+
     else 
       return false;
   }
 };
 
+struct ComparaEstados
+{
+	bool operator()(const estado &a, const estado &n) const
+	{
+		if ((a.jugador.f > n.jugador.f) or 
+      (a.jugador.f == n.jugador.f and a.jugador.c > n.jugador.c) or
+			(a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula > n.jugador.brujula) or
+			(a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
+       a.J_bikini == n.J_bikini and a.J_zapatillas > n.J_zapatillas) or
+			(a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
+       a.J_bikini == n.J_bikini and a.J_zapatillas == n.J_zapatillas and
+			 a.sonambulo.f > n.sonambulo.f) or
+			(a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
+       a.J_bikini == n.J_bikini and a.J_zapatillas == n.J_zapatillas and 
+       a.sonambulo.f == n.sonambulo.f and a.sonambulo.c > n.sonambulo.c) or
+			(a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
+       a.J_bikini == n.J_bikini and a.J_zapatillas == n.J_zapatillas and 
+       a.sonambulo.f == n.sonambulo.f and a.sonambulo.c == n.sonambulo.c and 
+       a.sonambulo.brujula > n.sonambulo.brujula) or
+      (a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
+       a.J_bikini == n.J_bikini and a.J_zapatillas == n.J_zapatillas and 
+       a.sonambulo.f == n.sonambulo.f and a.sonambulo.c == n.sonambulo.c and 
+       a.sonambulo.brujula == n.sonambulo.brujula and a.S_bikini > n.S_bikini) or
+      (a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
+       a.J_bikini == n.J_bikini and a.J_zapatillas == n.J_zapatillas and 
+       a.sonambulo.f == n.sonambulo.f and a.sonambulo.c == n.sonambulo.c and 
+       a.sonambulo.brujula == n.sonambulo.brujula and a.S_bikini == n.S_bikini and a.S_zapatillas > n.S_zapatillas ))
+			return true;
+		else
+			return false;
+	}
+};
+
+struct ComparaCoste{ // Función de comparación para la cola con prioridad (costo Uniforme)
+    bool operator() (const node &a, const node &b) const{
+        if (a.st.coste_total > b.st.coste_total )
+            return true;
+        else
+            return false;
+    }
+};
 
 class ComportamientoJugador : public Comportamiento {
   public:
@@ -94,10 +133,7 @@ class ComportamientoJugador : public Comportamiento {
     bool CasillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> &mapa);
     bool SonambuloALaVista(ubicacion &jugador, ubicacion &sonambulo);
 
-    int getCosteGiroJugador(estado &st);
-    int getCosteJugador(estado &st);
-    int getCosteGiroSonambulo(estado &st);
-    int getCosteSonambulo(estado &st);
+    void getCoste(const Action &a, estado &st, const vector<vector<unsigned char>> &mapa);
 
     void AnularMatriz(vector<vector<unsigned char>> &matriz);
 

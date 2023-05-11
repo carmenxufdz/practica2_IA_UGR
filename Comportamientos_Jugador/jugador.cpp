@@ -6,6 +6,7 @@
 #include <set>
 #include <stack>
 #include <queue>
+#include <map>
 
 ///////////////////////////////
 // Este es el método principal que se piden en la practica.
@@ -138,7 +139,7 @@ estado ComportamientoJugador::apply(const Action &a, const estado &st, const vec
 	switch(a){
 		case actFORWARD:
 			sig_ubicacion = NextCasilla(st.jugador);
-			if(CasillaTransitable(sig_ubicacion, mapa) and !(sig_ubicacion == st.sonambulo))
+			if(CasillaTransitable(sig_ubicacion, mapa) and !(sig_ubicacion.f == st.sonambulo.f and sig_ubicacion.c == st.sonambulo.c))
 				st_result.jugador = sig_ubicacion;
 			break;
 		case actTURN_L:
@@ -149,7 +150,7 @@ estado ComportamientoJugador::apply(const Action &a, const estado &st, const vec
 			break;
 		case actSON_FORWARD:
 			sig_ubicacion = NextCasilla(st.sonambulo);
-			if(CasillaTransitable(sig_ubicacion, mapa) and !(sig_ubicacion == st.jugador))
+			if(CasillaTransitable(sig_ubicacion, mapa) and !(sig_ubicacion.f == st.jugador.f and sig_ubicacion.c == st.jugador.c))
 				st_result.sonambulo = sig_ubicacion;
 			break;
 		case actSON_TURN_SL:
@@ -586,87 +587,166 @@ void ComportamientoJugador::AnularMatriz(vector<vector<unsigned char>> &matriz)
 
 
 // Devuelve el coste de avanzar en una casilla en el mapa
-int ComportamientoJugador::getCosteJugador(estado &st){
-	int coste = 1;
-	unsigned char casilla = mapaResultado[st.jugador.f][st.jugador.c];
+void ComportamientoJugador::getCoste(const Action &a, estado &st, const vector<vector<unsigned char>> &mapa){
+	
+	st.coste = 1;
+	unsigned char casilla ;
+	switch(a){
+		case actFORWARD:
+			casilla = mapa[st.jugador.f][st.jugador.c];
+			switch (casilla){
+				case 'A':
+					if(!st.J_bikini)
+						st.coste = 100;
+					else
+						st.coste = 10;
+				break;
 
-    if(casilla == 'A' && st.J_bikini == true)
-        coste = 10;
-    else if (casilla == 'A' && st.J_bikini == false)
-        coste = 200;
+				case 'B':
+					if(!st.J_zapatillas)
+						st.coste = 50;
+					else
+						st.coste = 15;
+				break;
 
-    if(casilla == 'B' && st.J_zapatillas == true)
-        coste = 15;
-    else if (casilla == 'B' && st.J_zapatillas == false)
-        coste = 100;
+				case 'T':
+					st.coste = 2;
+				break;
 
-    if(casilla == 'T')
-        coste = 2;
+				default:
+					st.coste = 1;
+				break;
+			}	
+		break;
+		case actTURN_L:
+			casilla = mapa[st.jugador.f][st.jugador.c];
+			switch (casilla){
+				case 'A':
+					if(!st.J_bikini)
+						st.coste = 25;
+					else
+						st.coste = 5;
+				break;
 
-	return coste;
+				case 'B':
+					if(!st.J_zapatillas)
+						st.coste = 5;
+					else
+						st.coste = 1;
+				break;
+
+				case 'T':
+					st.coste = 2;
+				break;
+
+				default:
+					st.coste = 1;
+				break;
+			}	
+		break;
+		
+		case actTURN_R:
+			casilla = mapa[st.jugador.f][st.jugador.c];
+			switch (casilla){
+				case 'A':
+					if(!st.J_bikini)
+						st.coste = 25;
+					else
+						st.coste = 5;
+				break;
+
+				case 'B':
+					if(!st.J_zapatillas)
+						st.coste = 5;
+					else
+						st.coste = 1;
+				break;
+
+				case 'T':
+					st.coste = 2;
+				break;
+
+				default:
+					st.coste = 1;
+				break;
+			}		
+		break;
+
+		case actSON_FORWARD:
+			casilla = mapa[st.sonambulo.f][st.sonambulo.c];
+			switch (casilla){
+				case 'A':
+					if(!st.J_bikini)
+						st.coste = 100;
+					else
+						st.coste = 10;
+				break;
+
+				case 'B':
+					if(!st.J_zapatillas)
+						st.coste = 50;
+					else
+						st.coste = 15;
+				break;
+
+				case 'T':
+					st.coste = 2;
+				break;
+
+				default:
+					st.coste = 1;
+				break;
+			}		
+		break;	
+		
+		case actSON_TURN_SL:
+			casilla = mapa[st.sonambulo.f][st.sonambulo.c];
+			switch (casilla){
+				case 'A':
+					if(!st.J_bikini)
+						st.coste = 7;
+					else
+						st.coste = 2;
+				break;
+
+				case 'B':
+					if(!st.J_zapatillas)
+						st.coste = 3;
+					else
+						st.coste = 1;
+				break;
+
+				default:
+					st.coste = 1;
+				break;
+			}		
+		break;	
+		
+		case actSON_TURN_SR:
+			casilla = mapa[st.sonambulo.f][st.sonambulo.c];
+			switch (casilla){
+				case 'A':
+					if(!st.J_bikini)
+						st.coste = 7;
+					else
+						st.coste = 2;
+				break;
+
+				case 'B':
+					if(!st.J_zapatillas)
+						st.coste = 3;
+					else
+						st.coste = 1;
+				break;
+
+				default:
+					st.coste = 1;
+				break;
+			}		
+		break;	
+		
+	}
 }
-
-int ComportamientoJugador::getCosteSonambulo(estado &st){
-	int coste = 1;
-	unsigned char casilla = mapaResultado[st.sonambulo.f][st.sonambulo.c];
-
-    if(casilla == 'A' && st.S_bikini == true)
-        coste = 10;
-    else if (casilla == 'A' && st.S_bikini == false)
-        coste = 200;
-
-    if(casilla == 'B' && st.S_zapatillas == true)
-        coste = 15;
-    else if (casilla == 'B' && st.S_zapatillas == false)
-        coste = 100;
-
-    if(casilla == 'T')
-        coste = 2;
-
-	return coste;
-}
-
-// Devuelve el coste de girar en una casilla en el mapa
-int ComportamientoJugador::getCosteGiroJugador(estado &st){
-	int coste = 1;
-	unsigned char casilla = mapaResultado[st.jugador.f][st.jugador.c];
-
-    if(casilla == 'A' && st.J_bikini == true)
-        coste = 5;
-    else if(casilla == 'A' && st.J_bikini == false)
-        coste = 500;
-
-    if(casilla == 'B' && st.J_zapatillas == true)
-        coste = 1;
-    else if (casilla == 'B' && st.J_zapatillas == false)
-        coste = 3;
-
-    if(casilla == 'T')
-        coste = 2;
-
-	return coste;
-}
-
-int ComportamientoJugador::getCosteGiroSonambulo(estado &st){
-	int coste = 1;
-	unsigned char casilla = mapaResultado[st.sonambulo.f][st.sonambulo.c];
-
-    if(casilla == 'A' && st.S_bikini == true)
-        coste = 5;
-    else if(casilla == 'A' && st.S_bikini == false)
-        coste = 500;
-
-    if(casilla == 'B' && st.S_zapatillas == true)
-        coste = 1;
-    else if (casilla == 'B' && st.S_zapatillas == false)
-        coste = 3;
-
-    if(casilla == 'T')
-        coste = 2;
-
-	return coste;
-}
-
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -861,51 +941,99 @@ list<Action> ComportamientoJugador::AnchuraJugadorYSonambulo(const estado &inici
 
 list<Action> ComportamientoJugador::CostoUniformeJugador(const estado &inicio, const ubicacion &final, 
 										const vector<vector<unsigned char>> &mapa) {
-
 	list<Action> plan;
-    set<node> explored;                  // Nodos ya explorados (cerrados)
-	priority_queue<node, vector<node>, greater<node>> frontier;  // Lista de nodos por explorar
-    node current_node;
+	set<estado, ComparaEstados> explored;
+	priority_queue<node, vector<node>, ComparaCoste> frontier;
+	node current_node;
 	current_node.st = inicio;
-    frontier.push(current_node);
+	getCoste(actFORWARD, current_node.st, mapa);
+	current_node.st.coste_total = current_node.st.coste;
+	bool SolutionFound = (current_node.st.sonambulo.f == final.f 
+						and current_node.st.sonambulo.c == final.c);
 
- 	while (!frontier.empty())
+	current_node.secuencia.empty();
+
+	if((mapa[current_node.st.jugador.f][current_node.st.jugador.c] == 'K') and (current_node.st.J_bikini == false)){
+		current_node.st.J_bikini = true;
+		current_node.st.J_zapatillas = false;
+	}
+	if((mapa[current_node.st.jugador.f][current_node.st.jugador.c] == 'D') and (current_node.st.J_zapatillas == false)){
+		current_node.st.J_bikini = false;
+		current_node.st.J_zapatillas = true;
+	}
+
+	frontier.push(current_node);
+
+	while(!frontier.empty() and !SolutionFound)
 	{
 		frontier.pop();
-		if (current_node.st.jugador.f == final.f && current_node.st.jugador.c == final.c) {
-            plan = current_node.secuencia;
-            break;
-        }
-		explored.insert(current_node);
+		explored.insert(current_node.st);
 
-        // Generar hijo actFORWARD
+		if((mapa[current_node.st.jugador.f][current_node.st.jugador.c] == 'K') and (current_node.st.J_bikini == false)){
+			current_node.st.J_bikini = true;
+			current_node.st.J_zapatillas = false;
+		}
+		if((mapa[current_node.st.jugador.f][current_node.st.jugador.c] == 'D') and (current_node.st.J_zapatillas == false)){
+			current_node.st.J_bikini = false;
+			current_node.st.J_zapatillas = true;
+		}
+		if(current_node.st.jugador.f == final.f and current_node.st.jugador.c == final.c)
+		{
+			SolutionFound = true;
+		}
+			
+		if(!SolutionFound){
+		// Generar hijo actFORWARD
 		node child_forward = current_node;
 		child_forward.st = apply(actFORWARD, current_node.st, mapa);
-		if(explored.find(child_forward) == explored.end())
+		if(explored.find(child_forward.st) == explored.end())
 		{
-			child_forward.coste += getCosteJugador(child_forward.st);
 			child_forward.secuencia.push_back(actFORWARD);
+			getCoste(actFORWARD, child_forward.st, mapa);
+			child_forward.st.coste_total = current_node.st.coste_total + child_forward.st.coste;
 			frontier.push(child_forward);
 		}
+		}
 
-		// Generar hijo actTURN_L
+		if(!SolutionFound)
+		{
+			// Generar hijo actTURN_L
 			node child_turnl = current_node;
 			child_turnl.st = apply(actTURN_L, current_node.st, mapa);
-			if(explored.find(child_turnl) == explored.end())
+			if(explored.find(child_turnl.st) == explored.end())
 			{
-				child_turnl.coste += getCosteGiroJugador(child_turnl.st);
 				child_turnl.secuencia.push_back(actTURN_L);
+				getCoste(actTURN_L, child_turnl.st, mapa);
+				child_turnl.st.coste_total = current_node.st.coste_total + child_turnl.st.coste;
 				frontier.push(child_turnl);
 			}
 			// Generar hijo actTURN_R
 			node child_turnr = current_node;
 			child_turnr.st = apply(actTURN_R, current_node.st, mapa);
-			if(explored.find(child_turnr) == explored.end())
+			if(explored.find(child_turnr.st) == explored.end())
 			{
-				child_turnr.coste += getCosteGiroJugador(child_turnr.st);
 				child_turnr.secuencia.push_back(actTURN_R);
+				getCoste(actTURN_R, child_turnr.st, mapa);
+				child_turnr.st.coste_total = current_node.st.coste_total + child_turnr.st.coste;
 				frontier.push(child_turnr);
 			}
+		}
+
+		if(!frontier.empty() and !SolutionFound){
+			current_node = frontier.top();	
+			while(!frontier.empty() and explored.find(current_node.st) != explored.end()){
+				frontier.pop();
+				if(!frontier.empty())
+					current_node = frontier.top();
+			}
+		}
+	}
+
+	if(SolutionFound){
+		cout << "Cargando el plan\n";
+		plan = current_node.secuencia;
+		cout << "Longitud del plan: " << plan.size() << endl;
+		PintaPlan(plan);
 	}
 
 	return plan;
