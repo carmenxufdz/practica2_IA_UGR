@@ -38,19 +38,45 @@ struct node{
     else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
             and st.sonambulo.brujula < n.st.sonambulo.brujula)
       return true;
-
+    
     else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
-            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.jugador.f < n.st.jugador.f)
+            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.S_bikini < n.st.S_bikini)
       return true;
 
     else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
-            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.jugador.f == n.st.jugador.f 
+            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.S_bikini == n.st.S_bikini
+            and st.S_zapatillas < n.st.S_zapatillas)
+      return true;
+
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.S_bikini == n.st.S_bikini
+            and st.S_zapatillas == n.st.S_zapatillas and st.jugador.f < n.st.jugador.f)
+      return true;
+
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.S_bikini == n.st.S_bikini
+            and st.S_zapatillas == n.st.S_zapatillas and st.jugador.f == n.st.jugador.f 
             and st.jugador.c < n.st.jugador.c)
       return true;
 
     else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
-            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.jugador.f == n.st.jugador.f 
+            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.S_bikini == n.st.S_bikini
+            and st.S_zapatillas == n.st.S_zapatillas and st.jugador.f == n.st.jugador.f 
             and st.jugador.c == n.st.jugador.c and st.jugador.brujula < n.st.jugador.brujula)
+      return true;
+
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.S_bikini == n.st.S_bikini
+            and st.S_zapatillas == n.st.S_zapatillas and st.jugador.f == n.st.jugador.f 
+            and st.jugador.c == n.st.jugador.c and st.jugador.brujula == n.st.jugador.brujula
+            and st.J_bikini < n.st.J_bikini)
+      return true;
+
+    else if (st.sonambulo.f == n.st.sonambulo.f and st.sonambulo.c == n.st.sonambulo.c 
+            and st.sonambulo.brujula == n.st.sonambulo.brujula and st.S_bikini == n.st.S_bikini
+            and st.S_zapatillas == n.st.S_zapatillas and st.jugador.f == n.st.jugador.f 
+            and st.jugador.c == n.st.jugador.c and st.jugador.brujula == n.st.jugador.brujula
+            and st.J_bikini == n.st.J_bikini and st.J_zapatillas < n.st.J_zapatillas)
       return true;
 
     else 
@@ -58,38 +84,6 @@ struct node{
   }
 };
 
-struct ComparaEstados
-{
-	bool operator()(const estado &a, const estado &n) const
-	{
-		if ((a.jugador.f > n.jugador.f) or 
-      (a.jugador.f == n.jugador.f and a.jugador.c > n.jugador.c) or
-			(a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula > n.jugador.brujula) or
-			(a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
-       a.J_bikini == n.J_bikini and a.J_zapatillas > n.J_zapatillas) or
-			(a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
-       a.J_bikini == n.J_bikini and a.J_zapatillas == n.J_zapatillas and
-			 a.sonambulo.f > n.sonambulo.f) or
-			(a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
-       a.J_bikini == n.J_bikini and a.J_zapatillas == n.J_zapatillas and 
-       a.sonambulo.f == n.sonambulo.f and a.sonambulo.c > n.sonambulo.c) or
-			(a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
-       a.J_bikini == n.J_bikini and a.J_zapatillas == n.J_zapatillas and 
-       a.sonambulo.f == n.sonambulo.f and a.sonambulo.c == n.sonambulo.c and 
-       a.sonambulo.brujula > n.sonambulo.brujula) or
-      (a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
-       a.J_bikini == n.J_bikini and a.J_zapatillas == n.J_zapatillas and 
-       a.sonambulo.f == n.sonambulo.f and a.sonambulo.c == n.sonambulo.c and 
-       a.sonambulo.brujula == n.sonambulo.brujula and a.S_bikini > n.S_bikini) or
-      (a.jugador.f == n.jugador.f and a.jugador.c == n.jugador.c and a.jugador.brujula == n.jugador.brujula and 
-       a.J_bikini == n.J_bikini and a.J_zapatillas == n.J_zapatillas and 
-       a.sonambulo.f == n.sonambulo.f and a.sonambulo.c == n.sonambulo.c and 
-       a.sonambulo.brujula == n.sonambulo.brujula and a.S_bikini == n.S_bikini and a.S_zapatillas > n.S_zapatillas ))
-			return true;
-		else
-			return false;
-	}
-};
 
 struct ComparaCoste{ // Función de comparación para la cola con prioridad (costo Uniforme)
     bool operator() (const node &a, const node &b) const{
@@ -144,6 +138,8 @@ class ComportamientoJugador : public Comportamiento {
     list<Action> AnchuraJugadorYSonambulo(const estado &inicio, const ubicacion &final,
 						const vector<vector<unsigned char>> &mapa);
     list<Action> CostoUniformeJugador(const estado &inicio, const ubicacion &final, 
+										const vector<vector<unsigned char>> &mapa);
+    list<Action> AlgoritmoA(const estado &inicio, const ubicacion &final, 
 										const vector<vector<unsigned char>> &mapa);
 
 
