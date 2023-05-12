@@ -84,7 +84,6 @@ struct node{
   }
 };
 
-
 struct ComparaCoste{ // Función de comparación para la cola con prioridad (costo Uniforme)
     bool operator() (const node &a, const node &b) const{
         if (a.st.coste_total > b.st.coste_total )
@@ -110,6 +109,8 @@ class ComportamientoJugador : public Comportamiento {
     Action think(Sensores sensores);
     int interact(Action accion, int valor);
 
+    Action PathFinding(Sensores sensores, estado &estado, ubicacion &final, vector<vector<unsigned char>> mapa);
+    
     void VisualizaPlan(const estado &st, const list<Action> &plan);
     void PintaPlan(list<Action> plan);
 
