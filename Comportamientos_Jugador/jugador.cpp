@@ -1040,6 +1040,152 @@ list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubica
 										const vector<vector<unsigned char>> &mapa)
 {
 	list<Action> plan;
+	set<node> explored;
+	priority_queue<node, vector<node>, ComparaCoste> frontier;
+	node current_node;
+	current_node.st = inicio;
+	getCoste(actFORWARD, current_node.st, mapa);
+	current_node.st.coste_total = current_node.st.coste;
+	bool SolutionFound = (current_node.st.sonambulo.f == final.f 
+						and current_node.st.sonambulo.c == final.c);
+
+	current_node.secuencia.empty();
+
+	frontier.push(current_node);
+
+	while(!frontier.empty() and !SolutionFound)
+	{	
+
+		if((mapa[current_node.st.jugador.f][current_node.st.jugador.c] == 'K') and (current_node.st.J_bikini == false)){
+			current_node.st.J_bikini = true;
+			current_node.st.J_zapatillas = false;
+		}
+		if((mapa[current_node.st.jugador.f][current_node.st.jugador.c] == 'D') and (current_node.st.J_zapatillas == false)){
+			current_node.st.J_bikini = false;
+			current_node.st.J_zapatillas = true;
+		}		
+		
+		if((mapa[current_node.st.sonambulo.f][current_node.st.sonambulo.c] == 'K') and (current_node.st.S_bikini == false)){
+			current_node.st.J_bikini = true;
+			current_node.st.J_zapatillas = false;
+		}
+		if((mapa[current_node.st.sonambulo.f][current_node.st.sonambulo.c] == 'D') and (current_node.st.S_zapatillas == false)){
+			current_node.st.J_bikini = false;
+			current_node.st.J_zapatillas = true;
+		}	
+
+		frontier.pop();
+		explored.insert(current_node);
+		
+		if(current_node.st.sonambulo.f == final.f and current_node.st.sonambulo.c == final.c){
+			SolutionFound = true;
+			break;
+		}
+
+		if(!SonambuloALaVista(current_node.st.jugador, current_node.st.sonambulo))
+		{
+			// Generar hijo actFORWARD
+			node child_forward = current_node;
+			getCoste(actFORWARD, child_forward.st, mapa);
+			child_forward.st = apply(actFORWARD, child_forward.st, mapa);
+
+			if(explored.find(child_forward) == explored.end())
+			{
+				child_forward.secuencia.push_back(actFORWARD);	
+				child_forward.st.coste_total = current_node.st.coste_total + child_forward.st.coste;
+				frontier.push(child_forward);
+			}
+
+			// Generar hijo actTURN_L
+			node child_turnl = current_node;
+			child_turnl.st = apply(actTURN_L, current_node.st, mapa);
+			if(explored.find(child_turnl) == explored.end())
+			{
+				child_turnl.secuencia.push_back(actTURN_L);
+				getCoste(actTURN_L, child_turnl.st, mapa);
+				child_turnl.st.coste_total = current_node.st.coste_total + child_turnl.st.coste;
+				frontier.push(child_turnl);
+			}
+			// Generar hijo actTURN_R
+			node child_turnr = current_node;
+			child_turnr.st = apply(actTURN_R, current_node.st, mapa);
+			if(explored.find(child_turnr) == explored.end())
+			{
+				child_turnr.secuencia.push_back(actTURN_R);
+				getCoste(actTURN_R, child_turnr.st, mapa);
+				child_turnr.st.coste_total = current_node.st.coste_total + child_turnr.st.coste;
+				frontier.push(child_turnr);
+			}
+		}
+		else
+		{
+			// Generar hijo actSON_FORWARD
+			node sonambulo_forward = current_node;
+			getCoste(actSON_FORWARD, sonambulo_forward.st, mapa);
+			sonambulo_forward.st = apply(actSON_FORWARD, current_node.st, mapa);
+			if(sonambulo_forward.st.sonambulo.f == final.f 
+				and sonambulo_forward.st.sonambulo.c == final.c)
+			{
+				sonambulo_forward.secuencia.push_back(actSON_FORWARD);
+				current_node = sonambulo_forward;
+				SolutionFound = true;
+			}    
+			else if(explored.find(sonambulo_forward) == explored.end())
+			{
+				// Añadir hijo a la lista de nodos por explorar
+				sonambulo_forward.secuencia.push_back(actSON_FORWARD);
+				sonambulo_forward.st.coste_total = current_node.st.coste_total + sonambulo_forward.st.coste;
+				frontier.push(sonambulo_forward);
+			}
+
+			if(!SolutionFound){
+
+				// Generar hijo actSON_TURN_SL
+				node sonambulo_turnl = current_node;
+				sonambulo_turnl.st = apply(actSON_TURN_SL, current_node.st, mapa);
+
+				if(explored.find(sonambulo_turnl) == explored.end())
+				{
+					// Añadir hijo a la lista de nodos por explorar
+					getCoste(actSON_TURN_SL, sonambulo_turnl.st, mapa);
+					sonambulo_turnl.st.coste_total = current_node.st.coste_total + sonambulo_turnl.st.coste;
+					sonambulo_turnl.secuencia.push_back(actSON_TURN_SL);
+					frontier.push(sonambulo_turnl);
+				}
+
+				// Generar hijo actSON_TURN_SL
+				node sonambulo_turnr = current_node;
+				sonambulo_turnr.st = apply(actSON_TURN_SR, current_node.st, mapa);
+
+				if(explored.find(sonambulo_turnr) == explored.end())
+				{
+					// Añadir hijo a la lista de nodos por explorar
+					getCoste(actSON_TURN_SR, sonambulo_turnr.st, mapa);
+					sonambulo_turnr.st.coste_total = current_node.st.coste_total + sonambulo_turnr.st.coste;
+					sonambulo_turnr.secuencia.push_back(actSON_TURN_SR);
+					frontier.push(sonambulo_turnr);
+				}
+			}
+		}
+
+		if(!frontier.empty() and !SolutionFound){
+			current_node = frontier.top();	
+			while(!frontier.empty() and explored.find(current_node) != explored.end()){
+				frontier.pop();
+				if(!frontier.empty())
+					current_node = frontier.top();
+			}
+		}
+		
+	}
+
+	if(SolutionFound){
+		cout << "Cargando el plan\n";
+		plan = current_node.secuencia;
+		cout << "Longitud del plan: " << plan.size() << endl;
+		PintaPlan(plan);
+	}
+
 	return plan;
 }
 
