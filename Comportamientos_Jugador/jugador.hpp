@@ -10,8 +10,6 @@ struct estado{
   ubicacion sonambulo;
   bool J_bikini, J_zapatillas;
   bool S_bikini, S_zapatillas;
-  int coste;
-  int coste_total = 0;
 
   bool operator== (const estado &x) const{
     return (jugador.f == x.jugador.f and jugador.c == x.jugador.c 
@@ -23,6 +21,7 @@ struct estado{
 struct node{
   estado st;
   list<Action> secuencia;
+  int prioridad, coste;
 
   bool operator== (const node &n) const{
     return (st == n.st);
@@ -84,13 +83,15 @@ struct node{
   }
 };
 
-struct ComparaCoste{ // Función de comparación para la cola con prioridad (costo Uniforme)
-    bool operator() (const node &a, const node &b) const{
-        if (a.st.coste_total > b.st.coste_total )
-            return true;
-        else
-            return false;
-    }
+struct functorNodo{
+  bool operator()(node &a, node &b){
+    if(a.prioridad > b.prioridad)
+      return true;
+    else if (a.prioridad == b.prioridad and a.coste > b.coste)
+      return true;
+    else 
+      return false;
+  }
 };
 
 class ComportamientoJugador : public Comportamiento {
@@ -128,11 +129,13 @@ class ComportamientoJugador : public Comportamiento {
     bool CasillaTransitable(const ubicacion &x, const vector<vector<unsigned char>> &mapa);
     bool SonambuloALaVista(ubicacion &jugador, ubicacion &sonambulo);
 
-    void getCoste(const Action &a, estado &st, const vector<vector<unsigned char>> &mapa);
-
+    
     void AnularMatriz(vector<vector<unsigned char>> &matriz);
 
     ubicacion NextCasilla(const ubicacion &pos);
+
+    int distanciaNodos(const ubicacion &origen, const ubicacion &destino);
+    int getCoste(const Action &a, node &n, const vector<vector<unsigned char>> &mapa);
     
     list<Action> AnchuraSoloJugador(const estado &inicio, const ubicacion &final,
 						const vector<vector<unsigned char>> &mapa);

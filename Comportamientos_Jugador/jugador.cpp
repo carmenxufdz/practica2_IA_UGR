@@ -7,6 +7,8 @@
 #include <stack>
 #include <queue>
 #include <map>
+#include <algorithm>	//find
+
 
 ///////////////////////////////
 // Este es el método principal que se piden en la practica.
@@ -591,164 +593,165 @@ void ComportamientoJugador::AnularMatriz(vector<vector<unsigned char>> &matriz)
 }
 
 // Devuelve el coste de avanzar en una casilla en el mapa
-void ComportamientoJugador::getCoste(const Action &a, estado &st, const vector<vector<unsigned char>> &mapa){
-	
+int ComportamientoJugador::getCoste(const Action &a, node &n, const vector<vector<unsigned char>> &mapa){
+	int coste = 0;
 	unsigned char casilla ;
 	switch(a){
 		case actFORWARD:
-			casilla = mapa[st.jugador.f][st.jugador.c];
+			casilla = mapa[n.st.jugador.f][n.st.jugador.c];
 			switch (casilla){
 				case 'A':
-					if(!st.J_bikini)
-						st.coste = 100;
+					if(!n.st.J_bikini)
+						coste = 100;
 					else
-						st.coste = 10;
+						coste = 10;
 				break;
 
 				case 'B':
-					if(!st.J_zapatillas)
-						st.coste = 50;
+					if(!n.st.J_zapatillas)
+						coste = 50;
 					else
-						st.coste = 15;
+						coste = 15;
 				break;
 
 				case 'T':
-					st.coste = 2;
+					coste = 2;
 				break;
 
 				default:
-					st.coste = 1;
+					coste = 1;
 				break;
 			}	
 		break;
 		case actTURN_L:
-			casilla = mapa[st.jugador.f][st.jugador.c];
+			casilla = mapa[n.st.jugador.f][n.st.jugador.c];
 			switch (casilla){
 				case 'A':
-					if(!st.J_bikini)
-						st.coste = 25;
+					if(!n.st.J_bikini)
+						coste = 25;
 					else
-						st.coste = 5;
+						coste = 5;
 				break;
 
 				case 'B':
-					if(!st.J_zapatillas)
-						st.coste = 5;
+					if(!n.st.J_zapatillas)
+						coste = 5;
 					else
-						st.coste = 1;
+						coste = 1;
 				break;
 
 				case 'T':
-					st.coste = 2;
+					coste = 2;
 				break;
 
 				default:
-					st.coste = 1;
+					coste = 1;
 				break;
 			}	
 		break;
 		
 		case actTURN_R:
-			casilla = mapa[st.jugador.f][st.jugador.c];
+			casilla = mapa[n.st.jugador.f][n.st.jugador.c];
 			switch (casilla){
 				case 'A':
-					if(!st.J_bikini)
-						st.coste = 25;
+					if(!n.st.J_bikini)
+						coste = 25;
 					else
-						st.coste = 5;
+						coste = 5;
 				break;
 
 				case 'B':
-					if(!st.J_zapatillas)
-						st.coste = 5;
+					if(!n.st.J_zapatillas)
+						coste = 5;
 					else
-						st.coste = 1;
+						coste = 1;
 				break;
 
 				case 'T':
-					st.coste = 2;
+					coste = 2;
 				break;
 
 				default:
-					st.coste = 1;
+					coste = 1;
 				break;
 			}		
 		break;
 
 		case actSON_FORWARD:
-			casilla = mapa[st.sonambulo.f][st.sonambulo.c];
+			casilla = mapa[n.st.jugador.f][n.st.jugador.c];
 			switch (casilla){
 				case 'A':
-					if(!st.J_bikini)
-						st.coste = 100;
+					if(!n.st.S_bikini)
+						coste = 100;
 					else
-						st.coste = 10;
+						coste = 10;
 				break;
 
 				case 'B':
-					if(!st.J_zapatillas)
-						st.coste = 50;
+					if(!n.st.S_zapatillas)
+						coste = 50;
 					else
-						st.coste = 15;
+						coste = 15;
 				break;
 
 				case 'T':
-					st.coste = 2;
+					coste = 2;
 				break;
 
 				default:
-					st.coste = 1;
+					coste = 1;
 				break;
 			}		
 		break;	
 		
 		case actSON_TURN_SL:
-			casilla = mapa[st.sonambulo.f][st.sonambulo.c];
+			casilla = mapa[n.st.jugador.f][n.st.jugador.c];
 			switch (casilla){
 				case 'A':
-					if(!st.J_bikini)
-						st.coste = 7;
+					if(!n.st.S_bikini)
+						coste = 7;
 					else
-						st.coste = 2;
+						coste = 2;
 				break;
 
 				case 'B':
-					if(!st.J_zapatillas)
-						st.coste = 3;
+					if(!n.st.S_zapatillas)
+						coste = 3;
 					else
-						st.coste = 1;
+						coste = 1;
 				break;
 
 				default:
-					st.coste = 1;
+					coste = 1;
 				break;
 			}		
 		break;	
 		
 		case actSON_TURN_SR:
-			casilla = mapa[st.sonambulo.f][st.sonambulo.c];
+			casilla = mapa[n.st.jugador.f][n.st.jugador.c];
 			switch (casilla){
 				case 'A':
-					if(!st.J_bikini)
-						st.coste = 7;
+					if(!n.st.S_bikini)
+						coste = 7;
 					else
-						st.coste = 2;
+						coste = 2;
 				break;
 
 				case 'B':
-					if(!st.J_zapatillas)
-						st.coste = 3;
+					if(!n.st.S_zapatillas)
+						coste = 3;
 					else
-						st.coste = 1;
+						coste = 1;
 				break;
 
 				default:
-					st.coste = 1;
+					coste = 1;
 				break;
 			}		
 		break;	
 		
 	}
+	return coste;
 }
 
 
@@ -946,11 +949,11 @@ list<Action> ComportamientoJugador::CostoUniformeJugador(const estado &inicio, c
 										const vector<vector<unsigned char>> &mapa) {
 	list<Action> plan;
 	set<node> explored;
-	priority_queue<node, vector<node>, ComparaCoste> frontier;
+	priority_queue<node, vector<node>, functorNodo> frontier;
 	node current_node;
 	current_node.st = inicio;
-	getCoste(actFORWARD, current_node.st, mapa);
-	current_node.st.coste_total = current_node.st.coste;
+	current_node.coste = getCoste(actFORWARD, current_node, mapa);;
+	current_node.prioridad = current_node.coste;
 	bool SolutionFound = (current_node.st.jugador.f == final.f 
 						and current_node.st.jugador.c == final.c);
 
@@ -980,34 +983,36 @@ list<Action> ComportamientoJugador::CostoUniformeJugador(const estado &inicio, c
 
 		// Generar hijo actFORWARD
 		node child_forward = current_node;
-		getCoste(actFORWARD, child_forward.st, mapa);
+		child_forward.coste = getCoste(actFORWARD, child_forward, mapa);
 		child_forward.st = apply(actFORWARD, child_forward.st, mapa);
 
 		if(explored.find(child_forward) == explored.end())
 		{
 			child_forward.secuencia.push_back(actFORWARD);	
-			child_forward.st.coste_total = current_node.st.coste_total + child_forward.st.coste;
+			child_forward.prioridad += child_forward.coste;
 			frontier.push(child_forward);
 		}
 
 		// Generar hijo actTURN_L
 		node child_turnl = current_node;
+		child_turnl.coste = getCoste(actTURN_L, child_turnl, mapa);
 		child_turnl.st = apply(actTURN_L, current_node.st, mapa);
+
 		if(explored.find(child_turnl) == explored.end())
 		{
 			child_turnl.secuencia.push_back(actTURN_L);
-			getCoste(actTURN_L, child_turnl.st, mapa);
-			child_turnl.st.coste_total = current_node.st.coste_total + child_turnl.st.coste;
+			child_turnl.prioridad += child_turnl.coste;
 			frontier.push(child_turnl);
 		}
 		// Generar hijo actTURN_R
 		node child_turnr = current_node;
+		child_turnr.coste = getCoste(actTURN_R, child_turnr, mapa);
 		child_turnr.st = apply(actTURN_R, current_node.st, mapa);
+
 		if(explored.find(child_turnr) == explored.end())
 		{
 			child_turnr.secuencia.push_back(actTURN_R);
-			getCoste(actTURN_R, child_turnr.st, mapa);
-			child_turnr.st.coste_total = current_node.st.coste_total + child_turnr.st.coste;
+			child_turnr.prioridad += child_turnr.coste;
 			frontier.push(child_turnr);
 		}
 
@@ -1036,25 +1041,32 @@ list<Action> ComportamientoJugador::CostoUniformeJugador(const estado &inicio, c
 ///////////////////////////////////////////// NIVEL 3 ///////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+int ComportamientoJugador::distanciaNodos(const ubicacion &origen, const ubicacion &destino)
+{
+	return abs(origen.c - destino.c) + abs(origen.f - destino.f);
+}
+
 list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubicacion &final, 
 										const vector<vector<unsigned char>> &mapa)
 {
 	list<Action> plan;
 	set<node> explored;
-	priority_queue<node, vector<node>, ComparaCoste> frontier;
+	priority_queue<node, vector<node>, functorNodo> frontier;
 	node current_node;
-	current_node.st = inicio;
-	getCoste(actFORWARD, current_node.st, mapa);
-	current_node.st.coste_total = current_node.st.coste;
 	bool SolutionFound = (current_node.st.sonambulo.f == final.f 
 						and current_node.st.sonambulo.c == final.c);
+	int costeG, costeH;
 
-	current_node.secuencia.empty();
+	current_node.st = inicio;
+	current_node.coste = 0;
+	current_node.prioridad = current_node.coste + distanciaNodos(current_node.st.sonambulo, final);
 
 	frontier.push(current_node);
 
-	while(!frontier.empty() and !SolutionFound)
-	{	
+	while(!frontier.empty())
+	{
+		frontier.pop();
+		explored.insert(current_node);
 
 		if((mapa[current_node.st.jugador.f][current_node.st.jugador.c] == 'K') and (current_node.st.J_bikini == false)){
 			current_node.st.J_bikini = true;
@@ -1063,57 +1075,56 @@ list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubica
 		if((mapa[current_node.st.jugador.f][current_node.st.jugador.c] == 'D') and (current_node.st.J_zapatillas == false)){
 			current_node.st.J_bikini = false;
 			current_node.st.J_zapatillas = true;
-		}		
-		
-		if((mapa[current_node.st.sonambulo.f][current_node.st.sonambulo.c] == 'K') and (current_node.st.S_bikini == false)){
-			current_node.st.J_bikini = true;
-			current_node.st.J_zapatillas = false;
-		}
-		if((mapa[current_node.st.sonambulo.f][current_node.st.sonambulo.c] == 'D') and (current_node.st.S_zapatillas == false)){
-			current_node.st.J_bikini = false;
-			current_node.st.J_zapatillas = true;
 		}	
 
-		frontier.pop();
-		explored.insert(current_node);
-		
-		if(current_node.st.sonambulo.f == final.f and current_node.st.sonambulo.c == final.c){
+		if((mapa[current_node.st.sonambulo.f][current_node.st.sonambulo.c] == 'K') and (current_node.st.S_bikini == false)){
+			current_node.st.S_bikini = true;
+			current_node.st.S_zapatillas = false;
+		}
+		if((mapa[current_node.st.sonambulo.f][current_node.st.sonambulo.c] == 'D') and (current_node.st.S_zapatillas == false)){
+			current_node.st.S_bikini = false;
+			current_node.st.S_zapatillas = true;
+		}	
+
+		if(current_node.st.sonambulo.f == final.f and current_node.st.sonambulo.c == final.c)
+		{
 			SolutionFound = true;
 			break;
 		}
 
-		if(!SonambuloALaVista(current_node.st.jugador, current_node.st.sonambulo))
-		{
+		if(!SonambuloALaVista(current_node.st.jugador, current_node.st.sonambulo)){
 			// Generar hijo actFORWARD
 			node child_forward = current_node;
-			getCoste(actFORWARD, child_forward.st, mapa);
-			child_forward.st = apply(actFORWARD, child_forward.st, mapa);
+			child_forward.coste += getCoste(actFORWARD, child_forward, mapa);
+			child_forward.prioridad = child_forward.coste;
+			child_forward.st = apply(actFORWARD, current_node.st, mapa);
 
 			if(explored.find(child_forward) == explored.end())
 			{
-				child_forward.secuencia.push_back(actFORWARD);	
-				child_forward.st.coste_total = current_node.st.coste_total + child_forward.st.coste;
+				child_forward.secuencia.push_back(actFORWARD);
 				frontier.push(child_forward);
 			}
 
 			// Generar hijo actTURN_L
 			node child_turnl = current_node;
+			child_turnl.coste += getCoste(actTURN_L, child_turnl, mapa);
+			child_turnl.prioridad = child_turnl.coste;
 			child_turnl.st = apply(actTURN_L, current_node.st, mapa);
+
 			if(explored.find(child_turnl) == explored.end())
 			{
 				child_turnl.secuencia.push_back(actTURN_L);
-				getCoste(actTURN_L, child_turnl.st, mapa);
-				child_turnl.st.coste_total = current_node.st.coste_total + child_turnl.st.coste;
 				frontier.push(child_turnl);
 			}
 			// Generar hijo actTURN_R
 			node child_turnr = current_node;
+			child_turnr.coste += getCoste(actTURN_R, child_turnr, mapa);
+			child_turnr.prioridad = child_turnr.coste;
+
 			child_turnr.st = apply(actTURN_R, current_node.st, mapa);
 			if(explored.find(child_turnr) == explored.end())
 			{
 				child_turnr.secuencia.push_back(actTURN_R);
-				getCoste(actTURN_R, child_turnr.st, mapa);
-				child_turnr.st.coste_total = current_node.st.coste_total + child_turnr.st.coste;
 				frontier.push(child_turnr);
 			}
 		}
@@ -1121,70 +1132,55 @@ list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubica
 		{
 			// Generar hijo actSON_FORWARD
 			node sonambulo_forward = current_node;
-			getCoste(actSON_FORWARD, sonambulo_forward.st, mapa);
+			sonambulo_forward.coste += getCoste(actSON_FORWARD, sonambulo_forward, mapa);
+			sonambulo_forward.prioridad = sonambulo_forward.coste + distanciaNodos(sonambulo_forward.st.sonambulo,final);
 			sonambulo_forward.st = apply(actSON_FORWARD, current_node.st, mapa);
-			if(sonambulo_forward.st.sonambulo.f == final.f 
-				and sonambulo_forward.st.sonambulo.c == final.c)
+
+			if(explored.find(sonambulo_forward) == explored.end())
 			{
 				sonambulo_forward.secuencia.push_back(actSON_FORWARD);
-				current_node = sonambulo_forward;
-				SolutionFound = true;
-			}    
-			else if(explored.find(sonambulo_forward) == explored.end())
-			{
-				// Añadir hijo a la lista de nodos por explorar
-				sonambulo_forward.secuencia.push_back(actSON_FORWARD);
-				sonambulo_forward.st.coste_total = current_node.st.coste_total + sonambulo_forward.st.coste;
 				frontier.push(sonambulo_forward);
 			}
 
-			if(!SolutionFound){
+			// Generar hijo actSON_TURN_SL
+			node sonambulo_turnl = current_node;
+			sonambulo_turnl.coste += getCoste(actSON_TURN_SL, sonambulo_turnl, mapa);
+			sonambulo_turnl.prioridad = sonambulo_turnl.coste + distanciaNodos(sonambulo_turnl.st.sonambulo,final);
+			sonambulo_turnl.st = apply(actSON_TURN_SL, current_node.st, mapa);
 
-				// Generar hijo actSON_TURN_SL
-				node sonambulo_turnl = current_node;
-				sonambulo_turnl.st = apply(actSON_TURN_SL, current_node.st, mapa);
+			if(explored.find(sonambulo_turnl) == explored.end())
+			{
+				// Añadir hijo a la lista de nodos por explorar
+				sonambulo_turnl.secuencia.push_back(actSON_TURN_SL);
+				frontier.push(sonambulo_turnl);
+			}
 
-				if(explored.find(sonambulo_turnl) == explored.end())
-				{
-					// Añadir hijo a la lista de nodos por explorar
-					getCoste(actSON_TURN_SL, sonambulo_turnl.st, mapa);
-					sonambulo_turnl.st.coste_total = current_node.st.coste_total + sonambulo_turnl.st.coste;
-					sonambulo_turnl.secuencia.push_back(actSON_TURN_SL);
-					frontier.push(sonambulo_turnl);
-				}
+			// Generar hijo actSON_TURN_SL
+			node sonambulo_turnr = current_node;
+			sonambulo_turnr.coste += getCoste(actSON_TURN_SR, sonambulo_turnr, mapa);
+			sonambulo_turnr.prioridad = sonambulo_turnr.coste + distanciaNodos(sonambulo_turnr.st.sonambulo,final);
+			sonambulo_turnr.st = apply(actSON_TURN_SR, current_node.st, mapa);
 
-				// Generar hijo actSON_TURN_SL
-				node sonambulo_turnr = current_node;
-				sonambulo_turnr.st = apply(actSON_TURN_SR, current_node.st, mapa);
-
-				if(explored.find(sonambulo_turnr) == explored.end())
-				{
-					// Añadir hijo a la lista de nodos por explorar
-					getCoste(actSON_TURN_SR, sonambulo_turnr.st, mapa);
-					sonambulo_turnr.st.coste_total = current_node.st.coste_total + sonambulo_turnr.st.coste;
-					sonambulo_turnr.secuencia.push_back(actSON_TURN_SR);
-					frontier.push(sonambulo_turnr);
-				}
+			if(explored.find(sonambulo_turnr) == explored.end())
+			{
+				// Añadir hijo a la lista de nodos por explorar
+				sonambulo_turnr.secuencia.push_back(actSON_TURN_SR);
+				frontier.push(sonambulo_turnr);
 			}
 		}
 
-		if(!frontier.empty() and !SolutionFound){
-			current_node = frontier.top();	
+		if(!SolutionFound and !frontier.empty()){
+			current_node = frontier.top();
 			while(!frontier.empty() and explored.find(current_node) != explored.end()){
 				frontier.pop();
 				if(!frontier.empty())
 					current_node = frontier.top();
 			}
 		}
-		
 	}
 
-	if(SolutionFound){
-		cout << "Cargando el plan\n";
+	if(SolutionFound)
 		plan = current_node.secuencia;
-		cout << "Longitud del plan: " << plan.size() << endl;
-		PintaPlan(plan);
-	}
 
 	return plan;
 }
