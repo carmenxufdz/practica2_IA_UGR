@@ -134,7 +134,7 @@ class ComportamientoJugador : public Comportamiento {
 
     ubicacion NextCasilla(const ubicacion &pos);
 
-    int distanciaNodos(const ubicacion &origen, const ubicacion &destino);
+    int distanciaNodos(const estado &origen, const ubicacion &destino);
     int getCoste(const Action &a, node &n, const vector<vector<unsigned char>> &mapa);
     
     list<Action> AnchuraSoloJugador(const estado &inicio, const ubicacion &final,

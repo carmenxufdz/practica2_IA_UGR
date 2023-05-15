@@ -678,7 +678,7 @@ int ComportamientoJugador::getCoste(const Action &a, node &n, const vector<vecto
 		break;
 
 		case actSON_FORWARD:
-			casilla = mapa[n.st.jugador.f][n.st.jugador.c];
+			casilla = mapa[n.st.sonambulo.f][n.st.sonambulo.c];
 			switch (casilla){
 				case 'A':
 					if(!n.st.S_bikini)
@@ -705,7 +705,7 @@ int ComportamientoJugador::getCoste(const Action &a, node &n, const vector<vecto
 		break;	
 		
 		case actSON_TURN_SL:
-			casilla = mapa[n.st.jugador.f][n.st.jugador.c];
+			casilla = mapa[n.st.sonambulo.f][n.st.sonambulo.c];
 			switch (casilla){
 				case 'A':
 					if(!n.st.S_bikini)
@@ -728,7 +728,7 @@ int ComportamientoJugador::getCoste(const Action &a, node &n, const vector<vecto
 		break;	
 		
 		case actSON_TURN_SR:
-			casilla = mapa[n.st.jugador.f][n.st.jugador.c];
+			casilla = mapa[n.st.sonambulo.f][n.st.sonambulo.c];
 			switch (casilla){
 				case 'A':
 					if(!n.st.S_bikini)
@@ -1041,9 +1041,10 @@ list<Action> ComportamientoJugador::CostoUniformeJugador(const estado &inicio, c
 ///////////////////////////////////////////// NIVEL 3 ///////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int ComportamientoJugador::distanciaNodos(const ubicacion &origen, const ubicacion &destino)
+int ComportamientoJugador::distanciaNodos(const estado &origen, const ubicacion &destino)
 {
-	return abs(origen.c - destino.c) + abs(origen.f - destino.f);
+	return (sqrt((abs(origen.sonambulo.c - destino.c) + abs(origen.sonambulo.f - destino.f))) 
+	+ (abs(origen.jugador.c - origen.sonambulo.c - 3) + abs(origen.jugador.f - origen.sonambulo.f - 3)));
 }
 
 list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubicacion &final, 
@@ -1059,7 +1060,7 @@ list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubica
 
 	current_node.st = inicio;
 	current_node.coste = 0;
-	current_node.prioridad = current_node.coste + distanciaNodos(current_node.st.sonambulo, final);
+	current_node.prioridad = distanciaNodos(current_node.st, final);
 
 	frontier.push(current_node);
 
@@ -1092,23 +1093,10 @@ list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubica
 			break;
 		}
 
-		if(!SonambuloALaVista(current_node.st.jugador, current_node.st.sonambulo)){
-			// Generar hijo actFORWARD
-			node child_forward = current_node;
-			child_forward.coste += getCoste(actFORWARD, child_forward, mapa);
-			child_forward.prioridad = child_forward.coste;
-			child_forward.st = apply(actFORWARD, current_node.st, mapa);
-
-			if(explored.find(child_forward) == explored.end())
-			{
-				child_forward.secuencia.push_back(actFORWARD);
-				frontier.push(child_forward);
-			}
-
 			// Generar hijo actTURN_L
 			node child_turnl = current_node;
 			child_turnl.coste += getCoste(actTURN_L, child_turnl, mapa);
-			child_turnl.prioridad = child_turnl.coste;
+			child_turnl.prioridad = child_turnl.coste + distanciaNodos(child_turnl.st,final);
 			child_turnl.st = apply(actTURN_L, current_node.st, mapa);
 
 			if(explored.find(child_turnl) == explored.end())
@@ -1119,7 +1107,7 @@ list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubica
 			// Generar hijo actTURN_R
 			node child_turnr = current_node;
 			child_turnr.coste += getCoste(actTURN_R, child_turnr, mapa);
-			child_turnr.prioridad = child_turnr.coste;
+			child_turnr.prioridad = child_turnr.coste + distanciaNodos(child_turnr.st,final);
 
 			child_turnr.st = apply(actTURN_R, current_node.st, mapa);
 			if(explored.find(child_turnr) == explored.end())
@@ -1127,25 +1115,25 @@ list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubica
 				child_turnr.secuencia.push_back(actTURN_R);
 				frontier.push(child_turnr);
 			}
-		}
-		else
-		{
-			// Generar hijo actSON_FORWARD
-			node sonambulo_forward = current_node;
-			sonambulo_forward.coste += getCoste(actSON_FORWARD, sonambulo_forward, mapa);
-			sonambulo_forward.prioridad = sonambulo_forward.coste + distanciaNodos(sonambulo_forward.st.sonambulo,final);
-			sonambulo_forward.st = apply(actSON_FORWARD, current_node.st, mapa);
+			
+			// Generar hijo actFORWARD
+			node child_forward = current_node;
+			child_forward.coste += getCoste(actFORWARD, child_forward, mapa);
+			child_forward.prioridad = child_forward.coste + distanciaNodos(child_forward.st,final);
+			child_forward.st = apply(actFORWARD, current_node.st, mapa);
 
-			if(explored.find(sonambulo_forward) == explored.end())
+			if(explored.find(child_forward) == explored.end())
 			{
-				sonambulo_forward.secuencia.push_back(actSON_FORWARD);
-				frontier.push(sonambulo_forward);
+				child_forward.secuencia.push_back(actFORWARD);
+				frontier.push(child_forward);
 			}
 
+		if(SonambuloALaVista(current_node.st.jugador, current_node.st.sonambulo))
+		{
 			// Generar hijo actSON_TURN_SL
 			node sonambulo_turnl = current_node;
 			sonambulo_turnl.coste += getCoste(actSON_TURN_SL, sonambulo_turnl, mapa);
-			sonambulo_turnl.prioridad = sonambulo_turnl.coste + distanciaNodos(sonambulo_turnl.st.sonambulo,final);
+			sonambulo_turnl.prioridad = sonambulo_turnl.coste + distanciaNodos(sonambulo_turnl.st,final);
 			sonambulo_turnl.st = apply(actSON_TURN_SL, current_node.st, mapa);
 
 			if(explored.find(sonambulo_turnl) == explored.end())
@@ -1155,10 +1143,10 @@ list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubica
 				frontier.push(sonambulo_turnl);
 			}
 
-			// Generar hijo actSON_TURN_SL
+			// Generar hijo actSON_TURN_SR
 			node sonambulo_turnr = current_node;
 			sonambulo_turnr.coste += getCoste(actSON_TURN_SR, sonambulo_turnr, mapa);
-			sonambulo_turnr.prioridad = sonambulo_turnr.coste + distanciaNodos(sonambulo_turnr.st.sonambulo,final);
+			sonambulo_turnr.prioridad = sonambulo_turnr.coste + distanciaNodos(sonambulo_turnr.st,final);
 			sonambulo_turnr.st = apply(actSON_TURN_SR, current_node.st, mapa);
 
 			if(explored.find(sonambulo_turnr) == explored.end())
@@ -1166,6 +1154,18 @@ list<Action> ComportamientoJugador::AlgoritmoA(const estado &inicio, const ubica
 				// Añadir hijo a la lista de nodos por explorar
 				sonambulo_turnr.secuencia.push_back(actSON_TURN_SR);
 				frontier.push(sonambulo_turnr);
+			}
+
+			// Generar hijo actSON_FORWARD
+			node sonambulo_forward = current_node;
+			sonambulo_forward.coste += getCoste(actSON_FORWARD, sonambulo_forward, mapa);
+			sonambulo_forward.prioridad = sonambulo_forward.coste + distanciaNodos(sonambulo_forward.st,final);
+			sonambulo_forward.st = apply(actSON_FORWARD, current_node.st, mapa);
+
+			if(explored.find(sonambulo_forward) == explored.end())
+			{
+				sonambulo_forward.secuencia.push_back(actSON_FORWARD);
+				frontier.push(sonambulo_forward);
 			}
 		}
 
